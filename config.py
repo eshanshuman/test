@@ -200,6 +200,39 @@ def interpolate_short_gaps(df: pd.DataFrame, max_gap_h: int) -> pd.DataFrame:
     return out
 
 
+def classification_split(test_size: float = 0.2):
+    """The one split shared by 03 and 04: stratified 80/20 on complete, labelled rows.
+
+    Returns X_train, X_test, y_train, y_test with y as class index (0 Good,
+    1 Moderate, 2 Critical). No resampling of any kind happens before the split.
+    """
+    from sklearn.model_selection import train_test_split
+    df = load_dataset().dropna(subset=FEATURES + [LABEL_COL])
+    y = df[LABEL_COL].map({c: i for i, c in enumerate(CLASSES)}).astype(int)
+    return train_test_split(df[FEATURES], y, test_size=test_size,
+                            stratify=y, random_state=SEED)
+
+
+def plot_confusion(cm, class_names, title: str, fig_name: str) -> Path:
+    """Confusion matrix: counts, with the share of each true class underneath."""
+    import matplotlib.pyplot as plt
+    cm = np.asarray(cm)
+    share = cm / np.maximum(cm.sum(axis=1, keepdims=True), 1)
+    fig, ax = plt.subplots(figsize=(4.8, 4.2))
+    ax.imshow(share, cmap="Blues", vmin=0, vmax=1)        # one hue, light -> dark
+    for i in range(cm.shape[0]):
+        for j in range(cm.shape[1]):
+            ax.text(j, i, f"{cm[i, j]:,}\n{100 * share[i, j]:.1f} %", ha="center", va="center",
+                    color="white" if share[i, j] > 0.55 else "#222222", fontsize=9)
+    ax.set_xticks(range(len(class_names)), class_names)
+    ax.set_yticks(range(len(class_names)), class_names)
+    ax.set_xlabel("Predicted")
+    ax.set_ylabel("True")
+    ax.grid(False)
+    ax.set_title(title)
+    return save_fig(fig, fig_name)
+
+
 if __name__ == "__main__":
     section("Active settings")
     print(f"  dataset      : {DATASET} ({DATASET_NOTE})")

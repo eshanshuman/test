@@ -64,5 +64,120 @@
         "salinity_ppt": 1.0
       }
     }
+  },
+  "03_random_forest": {
+    "n_train": 3675,
+    "n_test": 919,
+    "best_params": {
+      "class_weight": null,
+      "max_depth": null,
+      "min_samples_leaf": 4,
+      "n_estimators": 200
+    },
+    "cv_macro_f1": 0.9712,
+    "test": {
+      "accuracy": 0.9771,
+      "macro_f1": 0.9673
+    },
+    "rule_reference": {
+      "accuracy": 0.9771,
+      "macro_f1": 0.9758
+    },
+    "majority_baseline": {
+      "accuracy": 0.5288,
+      "macro_f1": 0.2306
+    },
+    "accuracy_minus_rule": 0.0,
+    "roc_auc_ovr": {
+      "Good": 0.9991,
+      "Moderate": 0.9985,
+      "Critical": 0.9994
+    },
+    "per_class_f1": {
+      "Good": 0.9800266311584553,
+      "Moderate": 0.9785932721712538,
+      "Critical": 0.9433962264150944
+    },
+    "permutation_importance": {
+      "do_mg_l": 0.4467,
+      "temperature_c": 0.2557,
+      "ph": 0.0191,
+      "salinity_ppt": 0.0009
+    },
+    "confusion_matrix": [
+      [
+        368,
+        11,
+        0
+      ],
+      [
+        4,
+        480,
+        2
+      ],
+      [
+        0,
+        4,
+        50
+      ]
+    ]
+  },
+  "04_lightgbm": {
+    "n_fit": 3123,
+    "n_val": 552,
+    "n_test": 919,
+    "best_iteration": 74,
+    "val_logloss": 0.0874,
+    "test": {
+      "accuracy": 0.9761,
+      "macro_f1": 0.9607
+    },
+    "rule_reference": {
+      "accuracy": 0.9771,
+      "macro_f1": 0.9758
+    },
+    "accuracy_minus_rule": -0.001,
+    "per_class_f1": {
+      "Good": 0.9813333333333333,
+      "Moderate": 0.9776422764227642,
+      "Critical": 0.9230769230769231
+    },
+    "mean_abs_shap": {
+      "Good": {
+        "ph": 0.1336,
+        "temperature_c": 1.276,
+        "do_mg_l": 1.8382,
+        "salinity_ppt": 0.0343
+      },
+      "Moderate": {
+        "ph": 0.153,
+        "temperature_c": 1.1113,
+        "do_mg_l": 1.8207,
+        "salinity_ppt": 0.0401
+      },
+      "Critical": {
+        "ph": 0.0797,
+        "temperature_c": 0.2972,
+        "do_mg_l": 0.4812,
+        "salinity_ppt": 0.0475
+      }
+    },
+    "confusion_matrix": [
+      [
+        368,
+        11,
+        0
+      ],
+      [
+        3,
+        481,
+        2
+      ],
+      [
+        0,
+        6,
+        48
+      ]
+    ]
   }
 }

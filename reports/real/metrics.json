@@ -44,5 +44,120 @@
         "salinity_ppt": 1.0
       }
     }
+  },
+  "03_random_forest": {
+    "n_train": 2312,
+    "n_test": 579,
+    "best_params": {
+      "class_weight": null,
+      "max_depth": null,
+      "min_samples_leaf": 1,
+      "n_estimators": 200
+    },
+    "cv_macro_f1": 0.9951,
+    "test": {
+      "accuracy": 1.0,
+      "macro_f1": 1.0
+    },
+    "rule_reference": {
+      "accuracy": 1.0,
+      "macro_f1": 1.0
+    },
+    "majority_baseline": {
+      "accuracy": 0.6632,
+      "macro_f1": 0.2658
+    },
+    "accuracy_minus_rule": 0.0,
+    "roc_auc_ovr": {
+      "Good": 1.0,
+      "Moderate": 1.0,
+      "Critical": 1.0
+    },
+    "per_class_f1": {
+      "Good": 1.0,
+      "Moderate": 1.0,
+      "Critical": 1.0
+    },
+    "permutation_importance": {
+      "ph": 0.3723,
+      "salinity_ppt": 0.2887,
+      "temperature_c": 0.2087,
+      "do_mg_l": 0.0767
+    },
+    "confusion_matrix": [
+      [
+        85,
+        0,
+        0
+      ],
+      [
+        0,
+        384,
+        0
+      ],
+      [
+        0,
+        0,
+        110
+      ]
+    ]
+  },
+  "04_lightgbm": {
+    "n_fit": 1965,
+    "n_val": 347,
+    "n_test": 579,
+    "best_iteration": 192,
+    "val_logloss": 0.0057,
+    "test": {
+      "accuracy": 0.9931,
+      "macro_f1": 0.9917
+    },
+    "rule_reference": {
+      "accuracy": 1.0,
+      "macro_f1": 1.0
+    },
+    "accuracy_minus_rule": -0.0069,
+    "per_class_f1": {
+      "Good": 0.9941520467836257,
+      "Moderate": 0.9948051948051948,
+      "Critical": 0.9861751152073732
+    },
+    "mean_abs_shap": {
+      "Good": {
+        "ph": 1.9883,
+        "temperature_c": 1.6079,
+        "do_mg_l": 0.4441,
+        "salinity_ppt": 1.938
+      },
+      "Moderate": {
+        "ph": 2.1858,
+        "temperature_c": 1.3036,
+        "do_mg_l": 0.5717,
+        "salinity_ppt": 2.0359
+      },
+      "Critical": {
+        "ph": 2.1733,
+        "temperature_c": 0.772,
+        "do_mg_l": 0.3364,
+        "salinity_ppt": 1.0776
+      }
+    },
+    "confusion_matrix": [
+      [
+        85,
+        0,
+        0
+      ],
+      [
+        1,
+        383,
+        0
+      ],
+      [
+        0,
+        3,
+        107
+      ]
+    ]
   }
 }
