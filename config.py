@@ -184,6 +184,22 @@ def load_dataset(path: Path | None = None) -> pd.DataFrame:
     return df.sort_values(TIME_COL).reset_index(drop=True)
 
 
+def interpolate_short_gaps(df: pd.DataFrame, max_gap_h: int) -> pd.DataFrame:
+    """Linearly fill runs of at most max_gap_h missing hours; longer gaps stay NaN.
+
+    Expects a regular hourly grid. Used by 00 (3 h, for labelling) and by
+    05/06/08 (MAX_GAP_H, before windows that touch a longer gap are skipped).
+    """
+    out = df.copy()
+    for col in out.columns:
+        s = out[col].astype(float)
+        gap = s.isna()
+        run_len = gap.groupby((~gap).cumsum()).transform("sum")   # length of each NaN run
+        filled = s.interpolate(limit_area="inside")               # never extrapolates
+        out[col] = s.mask(gap & (run_len <= max_gap_h), filled)
+    return out
+
+
 if __name__ == "__main__":
     section("Active settings")
     print(f"  dataset      : {DATASET} ({DATASET_NOTE})")

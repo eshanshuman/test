@@ -221,3 +221,7 @@ Start with phase 1.
   scripts, `python` in all documented commands).
 - papers/ was empty when phase 1 was built, so no docstring cites the PDFs
   directly yet. If the PDFs are added, read them and update the docstrings.
+- NERRS timestamps: pyreadr returns them in UTC; tools/fetch_nerrs.py shifts
+  them to local standard time (UTC-5) before cutting the Jun-Sep 2013 window,
+  so "hour of day" is local. Checked by the DO minimum falling at dawn.
+- The adapter's round-trip test lives in tools/test_prepare_roundtrip.py.

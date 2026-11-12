@@ -1,0 +1,48 @@
+{
+  "02_eda": {
+    "rows": 2928,
+    "labelled_rows": 2907,
+    "class_counts": {
+      "Good": 435,
+      "Moderate": 1923,
+      "Critical": 549
+    },
+    "majority_class_share": 0.6615,
+    "mutual_information_nats": {
+      "ph": 0.346,
+      "salinity_ppt": 0.2595,
+      "temperature_c": 0.1723,
+      "do_mg_l": 0.0872
+    },
+    "do_min_hour": 6,
+    "do_max_hour": 17,
+    "do_mean_at_min_hour": 5.101,
+    "do_mean_at_max_hour": 6.533,
+    "correlation": {
+      "ph": {
+        "ph": 1.0,
+        "temperature_c": 0.181,
+        "do_mg_l": 0.37,
+        "salinity_ppt": 0.216
+      },
+      "temperature_c": {
+        "ph": 0.181,
+        "temperature_c": 1.0,
+        "do_mg_l": 0.052,
+        "salinity_ppt": 0.173
+      },
+      "do_mg_l": {
+        "ph": 0.37,
+        "temperature_c": 0.052,
+        "do_mg_l": 1.0,
+        "salinity_ppt": -0.336
+      },
+      "salinity_ppt": {
+        "ph": 0.216,
+        "temperature_c": 0.173,
+        "do_mg_l": -0.336,
+        "salinity_ppt": 1.0
+      }
+    }
+  }
+}
