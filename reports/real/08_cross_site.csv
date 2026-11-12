@@ -1,0 +1,4 @@
+horizon,n_test,persistence_rmse,persistence_r2,transfer_rmse_mean,transfer_rmse_sd,transfer_r2_mean,local_rmse_mean,local_rmse_sd,local_r2_mean,transfer_beats_persistence,transfer_penalty_pct
+1,439,0.5278,0.5576,0.5093,0.0054,0.588,0.5076,0.005,0.5906,True,0.3218
+3,437,0.7908,0.0107,0.7676,0.0159,0.0676,0.7239,0.0329,0.1692,True,6.0273
+6,434,0.9421,-0.3955,0.882,0.0091,-0.2232,0.8064,0.0161,-0.0229,True,9.3663

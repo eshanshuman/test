@@ -427,5 +427,159 @@
       "Hypoxia": 0.01,
       "Normoxia": 0.9862
     }
+  },
+  "07_lr_vs_rf_scaling": {
+    "pool": 2312,
+    "n_test": 579,
+    "draws": 25,
+    "inputs": [
+      "ph",
+      "temperature_c",
+      "salinity_ppt",
+      "hour_sin",
+      "hour_cos"
+    ],
+    "mean_baseline_rmse": 1.1104,
+    "forest_ahead_from_n": 25,
+    "forest_clearly_ahead_from_n": 100,
+    "curve": [
+      {
+        "n_train": 25,
+        "lr_rmse_mean": 0.9698,
+        "lr_rmse_ci95": 0.033,
+        "rf_rmse_mean": 0.9622,
+        "rf_rmse_ci95": 0.0314,
+        "lr_r2_mean": 0.2307,
+        "rf_r2_mean": 0.243,
+        "rf_ahead": true,
+        "ci_separate": false
+      },
+      {
+        "n_train": 50,
+        "lr_rmse_mean": 0.9048,
+        "lr_rmse_ci95": 0.0154,
+        "rf_rmse_mean": 0.9009,
+        "rf_rmse_ci95": 0.0179,
+        "lr_r2_mean": 0.3335,
+        "rf_r2_mean": 0.3389,
+        "rf_ahead": true,
+        "ci_separate": false
+      },
+      {
+        "n_train": 100,
+        "lr_rmse_mean": 0.8741,
+        "lr_rmse_ci95": 0.008,
+        "rf_rmse_mean": 0.8155,
+        "rf_rmse_ci95": 0.0107,
+        "lr_r2_mean": 0.3787,
+        "rf_r2_mean": 0.4589,
+        "rf_ahead": true,
+        "ci_separate": true
+      },
+      {
+        "n_train": 200,
+        "lr_rmse_mean": 0.8581,
+        "lr_rmse_ci95": 0.0047,
+        "rf_rmse_mean": 0.7645,
+        "rf_rmse_ci95": 0.0119,
+        "lr_r2_mean": 0.4015,
+        "rf_r2_mean": 0.5244,
+        "rf_ahead": true,
+        "ci_separate": true
+      },
+      {
+        "n_train": 400,
+        "lr_rmse_mean": 0.8511,
+        "lr_rmse_ci95": 0.0025,
+        "rf_rmse_mean": 0.7053,
+        "rf_rmse_ci95": 0.0081,
+        "lr_r2_mean": 0.4112,
+        "rf_r2_mean": 0.5954,
+        "rf_ahead": true,
+        "ci_separate": true
+      },
+      {
+        "n_train": 800,
+        "lr_rmse_mean": 0.849,
+        "lr_rmse_ci95": 0.0014,
+        "rf_rmse_mean": 0.6545,
+        "rf_rmse_ci95": 0.0053,
+        "lr_r2_mean": 0.4141,
+        "rf_r2_mean": 0.6517,
+        "rf_ahead": true,
+        "ci_separate": true
+      },
+      {
+        "n_train": 1600,
+        "lr_rmse_mean": 0.8475,
+        "lr_rmse_ci95": 0.0006,
+        "rf_rmse_mean": 0.6037,
+        "rf_rmse_ci95": 0.0034,
+        "lr_r2_mean": 0.4162,
+        "rf_r2_mean": 0.7038,
+        "rf_ahead": true,
+        "ci_separate": true
+      },
+      {
+        "n_train": 2312,
+        "lr_rmse_mean": 0.847,
+        "lr_rmse_ci95": 0.0,
+        "rf_rmse_mean": 0.5778,
+        "rf_rmse_ci95": 0.001,
+        "lr_r2_mean": 0.4169,
+        "rf_r2_mean": 0.7287,
+        "rf_ahead": true,
+        "ci_separate": true
+      }
+    ]
+  },
+  "08_cross_site": {
+    "window_h": 168,
+    "units": 32,
+    "seeds": 3,
+    "results": [
+      {
+        "horizon": 1,
+        "n_test": 439,
+        "persistence_rmse": 0.5278,
+        "persistence_r2": 0.5576,
+        "transfer_rmse_mean": 0.5093,
+        "transfer_rmse_sd": 0.0054,
+        "transfer_r2_mean": 0.588,
+        "local_rmse_mean": 0.5076,
+        "local_rmse_sd": 0.005,
+        "local_r2_mean": 0.5906,
+        "transfer_beats_persistence": true,
+        "transfer_penalty_pct": 0.3218
+      },
+      {
+        "horizon": 3,
+        "n_test": 437,
+        "persistence_rmse": 0.7908,
+        "persistence_r2": 0.0107,
+        "transfer_rmse_mean": 0.7676,
+        "transfer_rmse_sd": 0.0159,
+        "transfer_r2_mean": 0.0676,
+        "local_rmse_mean": 0.7239,
+        "local_rmse_sd": 0.0329,
+        "local_r2_mean": 0.1692,
+        "transfer_beats_persistence": true,
+        "transfer_penalty_pct": 6.0273
+      },
+      {
+        "horizon": 6,
+        "n_test": 434,
+        "persistence_rmse": 0.9421,
+        "persistence_r2": -0.3955,
+        "transfer_rmse_mean": 0.882,
+        "transfer_rmse_sd": 0.0091,
+        "transfer_r2_mean": -0.2232,
+        "local_rmse_mean": 0.8064,
+        "local_rmse_sd": 0.0161,
+        "local_r2_mean": -0.0229,
+        "transfer_beats_persistence": true,
+        "transfer_penalty_pct": 9.3663
+      }
+    ]
   }
 }
