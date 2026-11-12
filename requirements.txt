@@ -1,0 +1,15 @@
+# Aquabot water-quality pipeline. Python 3.11.
+#   Windows:  py -3.11 -m venv .venv ; .venv\Scripts\Activate.ps1 ; python -m pip install -r requirements.txt
+numpy
+pandas
+scikit-learn
+matplotlib
+joblib
+lightgbm
+tensorflow; sys_platform != "linux"
+tensorflow-cpu; sys_platform == "linux"
+streamlit>=1.50
+plotly
+openpyxl
+pyreadr
+requests
