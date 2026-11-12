@@ -1,0 +1,68 @@
+{
+  "01_generate_dataset": {
+    "rows": 5000,
+    "noise_scale": 1.0,
+    "label_noise": 0.0,
+    "class_counts": {
+      "Good": 2073,
+      "Moderate": 2629,
+      "Critical": 298
+    },
+    "do_min_hour": 7,
+    "do_max_hour": 15,
+    "mean_do_by_crop_third": [
+      6.339,
+      5.626,
+      5.558
+    ],
+    "bloom_crashes": 2,
+    "complete_rows": 4594,
+    "rule_on_noisy_readings_accuracy": 0.9754
+  },
+  "02_eda": {
+    "rows": 5000,
+    "labelled_rows": 5000,
+    "class_counts": {
+      "Good": 2073,
+      "Moderate": 2629,
+      "Critical": 298
+    },
+    "majority_class_share": 0.5258,
+    "mutual_information_nats": {
+      "do_mg_l": 0.4038,
+      "temperature_c": 0.2195,
+      "ph": 0.1572,
+      "salinity_ppt": 0.1122
+    },
+    "do_min_hour": 7,
+    "do_max_hour": 15,
+    "do_mean_at_min_hour": 4.097,
+    "do_mean_at_max_hour": 8.273,
+    "correlation": {
+      "ph": {
+        "ph": 1.0,
+        "temperature_c": 0.241,
+        "do_mg_l": 0.814,
+        "salinity_ppt": 0.042
+      },
+      "temperature_c": {
+        "ph": 0.241,
+        "temperature_c": 1.0,
+        "do_mg_l": 0.394,
+        "salinity_ppt": 0.429
+      },
+      "do_mg_l": {
+        "ph": 0.814,
+        "temperature_c": 0.394,
+        "do_mg_l": 1.0,
+        "salinity_ppt": 0.139
+      },
+      "salinity_ppt": {
+        "ph": 0.042,
+        "temperature_c": 0.429,
+        "do_mg_l": 0.139,
+        "salinity_ppt": 1.0
+      }
+    }
+  }
+}
