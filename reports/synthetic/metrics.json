@@ -552,5 +552,67 @@
         "ci_separate": true
       }
     ]
+  },
+  "recommend": {
+    "model": "LightGBM",
+    "surrogate_fidelity": 0.9695,
+    "scenarios": [
+      {
+        "scenario": "Healthy afternoon",
+        "ph": 8.1,
+        "temperature_c": 30.0,
+        "do_mg_l": 7.5,
+        "salinity_ppt": 18.0,
+        "status": "Good",
+        "rule_status": "Good",
+        "model_status": "Good",
+        "model_confidence": 0.9954,
+        "agreement": true,
+        "n_actions": 1,
+        "n_immediate": 0
+      },
+      {
+        "scenario": "Dawn hypoxia",
+        "ph": 7.6,
+        "temperature_c": 28.5,
+        "do_mg_l": 2.4,
+        "salinity_ppt": 18.0,
+        "status": "Critical",
+        "rule_status": "Critical",
+        "model_status": "Critical",
+        "model_confidence": 0.9899,
+        "agreement": true,
+        "n_actions": 2,
+        "n_immediate": 1
+      },
+      {
+        "scenario": "Acid rain event",
+        "ph": 6.8,
+        "temperature_c": 27.5,
+        "do_mg_l": 5.5,
+        "salinity_ppt": 8.0,
+        "status": "Critical",
+        "rule_status": "Critical",
+        "model_status": "Moderate",
+        "model_confidence": 0.9904,
+        "agreement": false,
+        "n_actions": 5,
+        "n_immediate": 0
+      },
+      {
+        "scenario": "Heatwave + bloom",
+        "ph": 9.2,
+        "temperature_c": 34.6,
+        "do_mg_l": 11.0,
+        "salinity_ppt": 24.0,
+        "status": "Critical",
+        "rule_status": "Critical",
+        "model_status": "Critical",
+        "model_confidence": 0.9602,
+        "agreement": true,
+        "n_actions": 3,
+        "n_immediate": 0
+      }
+    ]
   }
 }

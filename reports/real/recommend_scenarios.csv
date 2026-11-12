@@ -1,0 +1,5 @@
+scenario,ph,temperature_c,do_mg_l,salinity_ppt,status,rule_status,model_status,model_confidence,agreement,n_actions,n_immediate
+Healthy afternoon,8.1,30.0,7.5,18.0,Good,Good,Good,1.0,True,1,0
+Dawn hypoxia,7.6,28.5,2.4,18.0,Critical,Critical,Critical,0.9994,True,2,1
+Acid rain event,6.8,27.5,5.5,8.0,Critical,Critical,Critical,1.0,True,4,0
+Heatwave + bloom,9.2,34.6,11.0,24.0,Critical,Critical,Good,1.0,False,4,0
