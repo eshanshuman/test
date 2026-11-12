@@ -225,3 +225,8 @@ Start with phase 1.
   them to local standard time (UTC-5) before cutting the Jun-Sep 2013 window,
   so "hour of day" is local. Checked by the DO minimum falling at dawn.
 - The adapter's round-trip test lives in tools/test_prepare_roundtrip.py.
+- All nine phases are built. README.md numbers come from one clean
+  `python run_all.py` (see reports/results_summary.md); after any re-run,
+  regenerate the summary and update the README tables to match.
+- run_all.py also runs 05 once with --target level (an addition to the brief).
+- Doses in recommend.py (DOSES dict) are unverified against CIBA/MPEDA sources.
