@@ -300,5 +300,54 @@
     },
     "skill_vs_persistence": -0.0626,
     "split_ok": true
+  },
+  "06_do_state_h6_random": {
+    "horizon_h": 6,
+    "split": "random",
+    "runs": 10,
+    "window_h": 24,
+    "lstm": {
+      "macro_f1_mean": 0.6913,
+      "macro_f1_sd": 0.0901,
+      "accuracy_mean": 0.9099,
+      "accuracy_sd": 0.0262
+    },
+    "persistence": {
+      "macro_f1_mean": 0.5431,
+      "macro_f1_sd": 0.1047,
+      "accuracy_mean": 0.8634,
+      "accuracy_sd": 0.0261
+    },
+    "yesterday": {
+      "macro_f1_mean": 0.6183,
+      "macro_f1_sd": 0.0787,
+      "accuracy_mean": 0.9032,
+      "accuracy_sd": 0.0255
+    },
+    "lstm_wins_vs_persistence": 10,
+    "lstm_wins_vs_yesterday": 6,
+    "lstm_beats_both": true,
+    "pooled_confusion_matrix": [
+      [
+        80,
+        62,
+        4
+      ],
+      [
+        60,
+        526,
+        208
+      ],
+      [
+        15,
+        304,
+        5975
+      ]
+    ],
+    "pooled_recall": {
+      "Anoxia": 0.5479,
+      "Hypoxia": 0.6625,
+      "Normoxia": 0.9493
+    }
   }
 }
