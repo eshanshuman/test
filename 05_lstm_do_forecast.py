@@ -163,6 +163,9 @@ def main() -> None:
     print(f"  (at +{MAIN_HORIZON} h 'same hour yesterday' is the last reading, i.e. identical to persistence)")
     verdict = "beats" if skill > 0 else "does NOT beat"
     print(f"  VERDICT: the LSTM {verdict} persistence at +{MAIN_HORIZON} h on this dataset.")
+    if res["lstm"]["r2"] <= 0:
+        print("  NEGATIVE RESULT: R² <= 0, so this forecast is no better than always predicting the "
+              "test-period mean DO, whatever it does against persistence.")
     if res["lstm"]["r2"] > 0.5:
         print("  NOTE: R² > 0.5 at +24 h. Persistence R² on the same hours is "
               f"{res['persistence']['r2']:.3f}; the daily cycle alone explains that much, so judge by skill.")
