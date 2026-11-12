@@ -1,0 +1,11 @@
+seed,n_train,n_test,epochs_run,states_in_test,lstm_f1,lstm_acc,persistence_f1,persistence_acc,yesterday_f1,yesterday_acc
+42,3285,732,11,Anoxia/Hypoxia/Normoxia,0.6083,0.8156,0.6278,0.8443,0.6017,0.7937
+43,3285,732,12,Anoxia/Hypoxia/Normoxia,0.5782,0.8169,0.6278,0.8443,0.6017,0.7937
+44,3285,732,23,Anoxia/Hypoxia/Normoxia,0.5897,0.8128,0.6278,0.8443,0.6017,0.7937
+45,3285,732,11,Anoxia/Hypoxia/Normoxia,0.5832,0.7896,0.6278,0.8443,0.6017,0.7937
+46,3285,732,21,Anoxia/Hypoxia/Normoxia,0.5455,0.7842,0.6278,0.8443,0.6017,0.7937
+47,3285,732,24,Anoxia/Hypoxia/Normoxia,0.5723,0.7842,0.6278,0.8443,0.6017,0.7937
+48,3285,732,16,Anoxia/Hypoxia/Normoxia,0.5498,0.806,0.6278,0.8443,0.6017,0.7937
+49,3285,732,15,Anoxia/Hypoxia/Normoxia,0.568,0.7923,0.6278,0.8443,0.6017,0.7937
+50,3285,732,12,Anoxia/Hypoxia/Normoxia,0.5574,0.8033,0.6278,0.8443,0.6017,0.7937
+51,3285,732,24,Anoxia/Hypoxia/Normoxia,0.5341,0.776,0.6278,0.8443,0.6017,0.7937
