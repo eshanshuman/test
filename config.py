@@ -36,6 +36,13 @@ REAL_CSV = DATA_DIR / "pond_dataset.csv"            # Dry Bar after 00_prepare
 REAL_SITE2_CSV = DATA_DIR / "pond_dataset_site2.csv"  # Cat Point (cross-site)
 
 
+# Third dataset (DO tasks only): real catfish ponds, Udanor et al. 2022. See tools/prepare_ponds.py.
+PONDS_RAW_DIR = RAW_DIR / "udanor"
+PONDS_DIR = DATA_DIR / "ponds"
+POND_IDS = (1, 3, 4, 6, 7, 9)                      # ponds that pass the checks in prepare_ponds.py
+PONDS_NOTE = "real catfish ponds, freshwater"
+
+
 def _pick_dataset() -> str:
     """AQUABOT_DATASET = synthetic | real. Unset: real if its CSV exists."""
     choice = os.environ.get("AQUABOT_DATASET", "").strip().lower()

@@ -1,0 +1,12 @@
+pond,file,raw_rows,do_kept_pct,ph_kept_pct,temp_kept_pct,do_removed_out_of_range,do_removed_stuck,hours_with_do,do_p5,do_median,do_p95,hours_below_4,hours_below_2,used,exclusion_reason
+1,IoTpond1.csv,83126,78.17,99.67,100.0,18145,0,1176,0.831,4.211,12.113,554,301,True,
+2,IoTPond2.csv,172249,46.52,55.41,100.0,27482,64633,1375,0.955,4.918,14.879,567,276,False,"repeats 97.7 % of pond 1's (timestamp, DO) pairs: not independent"
+3,IoTPond3.csv,169185,88.9,98.96,99.99,10882,7904,1426,3.086,5.08,14.327,141,15,True,
+4,IoTPond4.csv,89797,90.1,99.82,100.0,8888,0,1230,1.124,4.567,10.344,520,219,True,
+6,IoTPond6.csv,91015,86.56,84.87,100.0,12235,0,1367,0.482,5.249,15.625,559,371,True,
+7,IoTPond7.csv,279612,68.52,78.65,100.0,88016,0,1944,2.644,7.182,18.202,347,61,True,
+8,IoTPond8.csv,70744,60.43,58.4,99.99,27990,0,644,1.466,7.644,18.197,148,60,False,"only 644 hours of valid DO (needs 1,000)"
+9,IoTPond9.csv,151785,74.48,74.2,100.0,38740,0,1335,2.454,7.498,15.662,283,38,True,
+10,IoTPond10.csv,310,42.9,81.94,96.77,177,0,6,1.088,2.623,7.733,4,2,False,"only 6 hours of valid DO (needs 1,000)"
+11,IoTPond11.csv,627,36.04,100.0,100.0,401,0,13,0.845,5.353,16.289,4,2,False,"only 13 hours of valid DO (needs 1,000)"
+12,IoTPond12.csv,26,50.0,100.0,100.0,13,0,1,2.12,2.12,2.12,1,0,False,"only 1 hours of valid DO (needs 1,000)"

@@ -230,3 +230,9 @@ Start with phase 1.
   regenerate the summary and update the README tables to match.
 - run_all.py also runs 05 once with --target level (an addition to the brief).
 - Doses in recommend.py (DOSES dict) are unverified against CIBA/MPEDA sources.
+- Third dataset (added later): real catfish ponds, Udanor et al. 2022, DO tasks
+  only. Raw files go in data/raw/udanor/ (git-ignored; in the cloud session
+  they were downloaded from Kaggle and checked against the published SHA-256
+  sums). tools/prepare_ponds.py -> data/ponds/pond_XX.csv; 09_real_ponds.py ->
+  figures/ponds/, reports/ponds/. Label every result "real catfish ponds,
+  freshwater". Ponds used: 1, 3, 4, 6, 7, 9.
