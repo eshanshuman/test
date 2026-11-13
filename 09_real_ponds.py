@@ -173,7 +173,7 @@ def fig_forecast(table: pd.DataFrame) -> None:
     ax.set_ylabel("Test RMSE (mg/L), lower is better")
     ax.set_ylim(bottom=0)
     ax.grid(axis="x", visible=False)
-    ax.legend(fontsize=8, loc="upper left", ncol=2)
+    ax.legend(fontsize=8, loc="upper center", bbox_to_anchor=(0.5, -0.16), ncol=4)   # below the plot: clear of the dots
     ax.set_title(f"DO forecast error on six ponds: small dots = one pond, large = mean over ponds\n"
                  f"{cfg.PONDS_NOTE} (Udanor et al. 2022); LSTMs averaged over {len(SEEDS)} seeds")
     cfg.save_fig(fig, "fig18_pond_forecast", FIG_DIR)

@@ -87,6 +87,7 @@ def windows(scaled: np.ndarray, t: np.ndarray, window: int) -> np.ndarray:
 def seed_everything(seed: int) -> None:
     import tensorflow as tf
     tf.keras.utils.set_random_seed(seed)                 # python, numpy and TF seeds
+    tf.get_logger().setLevel("ERROR")                    # hide retracing notices when many models are built
 
 
 def build_lstm(window: int, units: int, n_out: int = 1, activation=None):
