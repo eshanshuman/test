@@ -10,6 +10,10 @@ Purpose
          with --target level for the comparison), 06 three times (+6 h; +1 h;
          +6 h --split time), 07 and recommend.py, with AQUABOT_DATASET set.
       3. 08 (cross-site, real data only).
+      4. Real catfish ponds (Udanor et al. 2022): tools/prepare_ponds.py, then
+         09. If data/raw/udanor/ is missing the preparation is skipped with a
+         note; 09 still runs when the prepared hourly files in data/ponds/
+         are present, and is skipped with a note when they are not.
     Every step is started with the same Python that runs this file
     (sys.executable) and PYTHONIOENCODING=utf-8, so it behaves the same in
     Windows PowerShell as on Linux. A failing step is reported and the run
@@ -22,7 +26,7 @@ Outputs
     per step. Exit code 1 if any step failed.
 
 Run
-    python run_all.py            (add --only synthetic or --only real)
+    python run_all.py            (add --only synthetic, --only real or --only ponds)
 """
 from __future__ import annotations
 
@@ -65,9 +69,9 @@ def run_step(name: str, args: list[str], dataset: str | None) -> dict:
 
 def main() -> None:
     ap = argparse.ArgumentParser(description="Run the whole Aquabot pipeline")
-    ap.add_argument("--only", choices=["synthetic", "real"], help="run one dataset only")
+    ap.add_argument("--only", choices=["synthetic", "real", "ponds"], help="run one dataset only")
     args = ap.parse_args()
-    datasets = [args.only] if args.only else ["synthetic", "real"]
+    datasets = [args.only] if args.only else ["synthetic", "real", "ponds"]
     results, t0 = [], time.time()
 
     if "synthetic" in datasets:
@@ -75,7 +79,7 @@ def main() -> None:
         metrics.unlink(missing_ok=True)                   # 01 writes the first block of a fresh file
         results.append(run_step("01 Generate synthetic pond", ["01_generate_dataset.py"], None))
 
-    for dataset in datasets:
+    for dataset in [d for d in datasets if d != "ponds"]:
         if dataset == "real":
             if not (ROOT / "data" / "pond_dataset.csv").exists():
                 print("\nSKIPPING real data: data/pond_dataset.csv not found. Run "
@@ -88,6 +92,19 @@ def main() -> None:
 
     if "real" in datasets and (ROOT / "data" / "pond_dataset_site2.csv").exists():
         results.append(run_step("08 Cross-site", ["08_cross_site.py"], "real"))
+
+    if "ponds" in datasets:
+        if (ROOT / "data" / "raw" / "udanor").exists():
+            results.append(run_step("Prepare ponds", ["tools/prepare_ponds.py"], None))
+        else:
+            print("\nSKIPPING pond preparation: data/raw/udanor/ not found (download the Kaggle dataset, "
+                  "doi:10.34740/KAGGLE/DSV/3748790, and unzip its CSV files there).")
+        if (ROOT / "data" / "ponds" / "pond_01.csv").exists():
+            (ROOT / "reports" / "ponds" / "metrics.json").unlink(missing_ok=True)
+            results.append(run_step("09 Real ponds", ["09_real_ponds.py"], None))
+        else:
+            print("\nSKIPPING 09 real ponds: no prepared files in data/ponds/.")
+            results.append({"step": "ponds dataset (missing)", "ok": False, "minutes": 0.0})
 
     print(f"\n{'=' * 72}\nSUMMARY\n{'=' * 72}")
     print(f"  {'step':<52}{'result':>8}{'minutes':>10}")
