@@ -236,3 +236,6 @@ Start with phase 1.
   sums). tools/prepare_ponds.py -> data/ponds/pond_XX.csv; 09_real_ponds.py ->
   figures/ponds/, reports/ponds/. Label every result "real catfish ponds,
   freshwater". Ponds used: 1, 3, 4, 6, 7, 9.
+- Pond results in README sections 3 and 4.8 come from `python run_all.py --only
+  ponds`; run_all.py runs 09 from data/ponds/ even when data/raw/udanor/ is
+  absent (only the preparation step is skipped then).

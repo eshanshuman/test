@@ -186,3 +186,64 @@ Forest stays ahead from n = 25; with non-overlapping CIs from n = 100. Always pr
 
 Depth-3 surrogate tree agrees with the model on 80.7 % of test readings.
 
+## Dataset: ponds (real catfish ponds, freshwater; Udanor et al. 2022)
+
+### Raw files and quality control (prepare_ponds)
+
+| Pond | Raw rows | DO kept | Hours with DO | DO p5 / median / p95 (mg/L) | Hours < 4 mg/L | Hours < 2 mg/L | Used | Why excluded |
+|---|---|---|---|---|---|---|---|---|
+| 1 | 83,126 | 78.2 % | 1,176 | 0.83 / 4.21 / 12.11 | 554 | 301 | yes |  |
+| 2 | 172,249 | 46.5 % | 1,375 | 0.95 / 4.92 / 14.88 | 567 | 276 | no | repeats 97.7 % of pond 1's (timestamp, DO) pairs: not independent |
+| 3 | 169,185 | 88.9 % | 1,426 | 3.09 / 5.08 / 14.33 | 141 | 15 | yes |  |
+| 4 | 89,797 | 90.1 % | 1,230 | 1.12 / 4.57 / 10.34 | 520 | 219 | yes |  |
+| 6 | 91,015 | 86.6 % | 1,367 | 0.48 / 5.25 / 15.62 | 559 | 371 | yes |  |
+| 7 | 279,612 | 68.5 % | 1,944 | 2.64 / 7.18 / 18.20 | 347 | 61 | yes |  |
+| 8 | 70,744 | 60.4 % | 644 | 1.47 / 7.64 / 18.20 | 148 | 60 | no | only 644 hours of valid DO (needs 1,000) |
+| 9 | 151,785 | 74.5 % | 1,335 | 2.45 / 7.50 / 15.66 | 283 | 38 | yes |  |
+| 10 | 310 | 42.9 % | 6 | 1.09 / 2.62 / 7.73 | 4 | 2 | no | only 6 hours of valid DO (needs 1,000) |
+| 11 | 627 | 36.0 % | 13 | 0.84 / 5.35 / 16.29 | 4 | 2 | no | only 13 hours of valid DO (needs 1,000) |
+| 12 | 26 | 50.0 % | 1 | 2.12 / 2.12 / 2.12 | 1 | 0 | no | only 1 hours of valid DO (needs 1,000) |
+
+### DO forecast per pond (09), test RMSE in mg/L, 24-h window, 3 seeds
+
+| Pond | Horizon | Test hours | Local LSTM | LSTM from other 5 ponds | Persistence | Same hour yesterday |
+|---|---|---|---|---|---|---|
+| 1 | +1 h | 125 | 0.863 ± 0.030 | 1.110 ± 0.035 | 0.809 | 0.868 |
+| 3 | +1 h | 168 | 0.148 ± 0.037 | 0.399 ± 0.128 | 0.020 | 0.032 |
+| 4 | +1 h | 125 | 1.405 ± 0.083 | 1.046 ± 0.039 | 0.937 | 1.273 |
+| 6 | +1 h | 107 | 1.364 ± 0.193 | 1.308 ± 0.087 | 1.115 | 1.354 |
+| 7 | +1 h | 181 | 0.688 ± 0.123 | 0.512 ± 0.027 | 0.436 | 1.825 |
+| 9 | +1 h | 102 | 0.751 ± 0.076 | 0.735 ± 0.088 | 0.642 | 2.314 |
+| 1 | +3 h | 121 | 1.052 ± 0.094 | 1.750 ± 0.139 | 0.929 | 0.873 |
+| 3 | +3 h | 164 | 0.284 ± 0.063 | 0.813 ± 0.269 | 0.020 | 0.032 |
+| 4 | +3 h | 121 | 1.431 ± 0.150 | 1.808 ± 0.272 | 1.240 | 1.287 |
+| 6 | +3 h | 103 | 1.750 ± 0.491 | 1.593 ± 0.410 | 1.100 | 1.054 |
+| 7 | +3 h | 176 | 1.340 ± 0.242 | 0.941 ± 0.062 | 0.789 | 1.843 |
+| 9 | +3 h | 101 | 1.200 ± 0.111 | 1.222 ± 0.123 | 1.087 | 1.836 |
+| 1 | +6 h | 115 | 0.996 ± 0.034 | 2.045 ± 0.321 | 0.894 | 0.875 |
+| 3 | +6 h | 158 | 0.495 ± 0.124 | 1.280 ± 0.235 | 0.021 | 0.033 |
+| 4 | +6 h | 114 | 1.627 ± 0.179 | 2.439 ± 0.446 | 1.386 | 1.349 |
+| 6 | +6 h | 98 | 2.247 ± 0.944 | 2.003 ± 0.167 | 1.300 | 1.385 |
+| 7 | +6 h | 168 | 1.863 ± 0.341 | 1.246 ± 0.119 | 1.043 | 1.871 |
+| 9 | +6 h | 98 | 1.411 ± 0.159 | 1.593 ± 0.054 | 1.249 | 1.861 |
+
+### Oxygen state +6 h per pond (09), macro F1 over the states present
+
+| Pond | Test hours | States in test | Local LSTM | LSTM from other 5 ponds | Persistence | Same hour yesterday |
+|---|---|---|---|---|---|---|
+| 1 | 115 | Anoxia/Hypoxia/Normoxia | 0.323 ± 0.037 | 0.156 ± 0.055 | 0.497 | 0.482 |
+| 3 | 158 | Normoxia | 0.960 ± 0.057 | 0.684 ± 0.096 | 1.000 | 1.000 |
+| 4 | 114 | Anoxia/Hypoxia/Normoxia | 0.173 ± 0.069 | 0.482 ± 0.057 | 0.522 | 0.538 |
+| 6 | 98 | Anoxia/Hypoxia/Normoxia | 0.103 ± 0.000 | 0.271 ± 0.027 | 0.633 | 0.642 |
+| 7 | 168 | Hypoxia/Normoxia | 0.176 ± 0.133 | 0.295 ± 0.050 | 0.891 | 0.722 |
+| 9 | 98 | Hypoxia/Normoxia | 0.030 ± 0.028 | 0.343 ± 0.051 | 0.495 | 0.481 |
+
+### Mean over the six ponds (09)
+
+| Task | Local LSTM | LSTM from other 5 ponds | Persistence | Same hour yesterday | Local beats better baseline | Transferred beats better baseline | Transferred beats local |
+|---|---|---|---|---|---|---|---|
+| DO forecast RMSE, +1 h | 0.870 | 0.852 | 0.660 | 1.278 | 0 of 6 | 0 of 6 | 4 of 6 |
+| DO forecast RMSE, +3 h | 1.176 | 1.355 | 0.861 | 1.154 | 0 of 6 | 0 of 6 | 2 of 6 |
+| DO forecast RMSE, +6 h | 1.440 | 1.768 | 0.982 | 1.229 | 0 of 6 | 0 of 6 | 2 of 6 |
+| Oxygen state macro F1, +6 h | 0.294 | 0.372 | 0.673 | 0.644 | 0 of 6 | 0 of 6 | 4 of 6 |
+
