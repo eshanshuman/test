@@ -113,6 +113,16 @@ def train(model, X_tr, y_tr, X_va, y_va, epochs: int, loss="mse", patience: int 
     return len(hist.history["loss"]), float(min(hist.history["val_loss"]))
 
 
+def sqrt_class_weights(y: np.ndarray, n_classes: int = 3) -> dict:
+    """Square-root inverse-frequency class weights, mean 1 over the classes present."""
+    counts = np.bincount(y, minlength=n_classes)
+    present = counts > 0
+    w = np.zeros(n_classes)
+    w[present] = np.sqrt(counts.sum() / (present.sum() * counts[present]))
+    w[present] /= w[present].mean()
+    return {i: float(w[i]) for i in range(n_classes) if present[i]}
+
+
 def regression_scores(y_true, y_pred) -> dict:
     err = np.asarray(y_pred, float) - np.asarray(y_true, float)
     ss_res, ss_tot = float((err**2).sum()), float(((y_true - np.mean(y_true))**2).sum())

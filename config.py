@@ -146,10 +146,12 @@ def apply_style() -> None:
     })
 
 
-def save_fig(fig, name: str) -> Path:
-    """Save to figures/<dataset>/<name>.png at 300 DPI and print where it went."""
+def save_fig(fig, name: str, folder: Path | None = None) -> Path:
+    """Save to figures/<dataset>/<name>.png (or folder) at 300 DPI and print where it went."""
     import matplotlib.pyplot as plt
-    path = FIG_DIR / (name if name.endswith(".png") else f"{name}.png")
+    folder = folder or FIG_DIR
+    folder.mkdir(parents=True, exist_ok=True)
+    path = folder / (name if name.endswith(".png") else f"{name}.png")
     fig.savefig(path, dpi=FIG_DPI)
     plt.close(fig)
     print(f"  saved {path.relative_to(ROOT).as_posix()}")
@@ -173,11 +175,13 @@ def _plain(obj):
     raise TypeError(f"cannot serialise {type(obj).__name__}")
 
 
-def record_metric(name: str, values: dict) -> None:
-    """Write one block of headline numbers to reports/<dataset>/metrics.json."""
-    metrics = json.loads(METRICS_JSON.read_text(encoding="utf-8")) if METRICS_JSON.exists() else {}
+def record_metric(name: str, values: dict, path: Path | None = None) -> None:
+    """Write one block of headline numbers to reports/<dataset>/metrics.json (or path)."""
+    path = path or METRICS_JSON
+    path.parent.mkdir(parents=True, exist_ok=True)
+    metrics = json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
     metrics[name] = values
-    METRICS_JSON.write_text(json.dumps(metrics, indent=2, default=_plain), encoding="utf-8")
+    path.write_text(json.dumps(metrics, indent=2, default=_plain), encoding="utf-8")
 
 
 def load_dataset(path: Path | None = None) -> pd.DataFrame:
