@@ -235,7 +235,10 @@ Start with phase 1.
   they were downloaded from Kaggle and checked against the published SHA-256
   sums). tools/prepare_ponds.py -> data/ponds/pond_XX.csv; 09_real_ponds.py ->
   figures/ponds/, reports/ponds/. Label every result "real catfish ponds,
-  freshwater". Ponds used: 1, 3, 4, 6, 7, 9.
+  freshwater". Ponds used: 1, 4, 6, 7, 9 (pond 3 dropped after the hourly
+  stuck-sensor fix: 747 of its 1,426 DO hours were the value 5.080).
+- The DL_Models_Fishweight re-analysis is about FISH WEIGHT, not DO: cite it
+  only for its checksums and its fish-weight finding.
 - Pond results in README sections 3 and 4.8 come from `python run_all.py --only
   ponds`; run_all.py runs 09 from data/ponds/ even when data/raw/udanor/ is
   absent (only the preparation step is skipped then).

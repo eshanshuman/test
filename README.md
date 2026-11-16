@@ -15,7 +15,8 @@ is only said to "work" where it beats them.
 (22 of 22 steps succeeded, 34.4 minutes on a 4-core CPU without a GPU),
 formatted by `tools/summarize_results.py` into `reports/results_summary.md`.
 The real-pond results (sections 3 and 4.8) were added afterwards and come from
-`python run_all.py --only ponds` (2 of 2 steps succeeded, 10.3 minutes).
+`python run_all.py --only ponds` (2 of 2 steps succeeded, 6.7 minutes), run
+after the stuck-sensor fix described in section 3.
 
 ## 1. Setup (Windows, PowerShell)
 
@@ -143,36 +144,56 @@ Datasets" (Udanor et al. 2022, Data in Brief 43:108400; Kaggle
 doi:10.34740/KAGGLE/DSV/3748790; CC BY 4.0). African catfish (*Clarias
 gariepinus*) in indoor tarpaulin ponds at the University of Nigeria Nsukka,
 June-December 2021, a reading every few seconds to minutes. All 11 raw files
-match the SHA-256 sums published with the leakage-aware re-analysis.
-`tools/prepare_ponds.py` applies range limits (DO 0.1-20 mg/L, pH 4-11,
-temperature 15-40 °C), removes runs of 30 or more identical DO or pH readings
-(stuck sensor) and takes hourly medians of at least 3 valid readings.
+match published SHA-256 sums (see References). `tools/prepare_ponds.py` cleans
+them in two stages:
 
-| Pond | Raw rows | DO readings kept | Hours with DO | DO p5 / median / p95 (mg/L) | Hours < 4 mg/L | Hours < 2 mg/L |
-|---|---|---|---|---|---|---|
-| 1 | 83,126 | 78.2 % | 1,176 | 0.83 / 4.21 / 12.11 | 554 | 301 |
-| 3 | 169,185 | 88.9 % | 1,426 | 3.09 / 5.08 / 14.33 | 141 | 15 |
-| 4 | 89,797 | 90.1 % | 1,230 | 1.12 / 4.57 / 10.34 | 520 | 219 |
-| 6 | 91,015 | 86.6 % | 1,367 | 0.48 / 5.25 / 15.62 | 559 | 371 |
-| 7 | 279,612 | 68.5 % | 1,944 | 2.64 / 7.18 / 18.20 | 347 | 61 |
-| 9 | 151,785 | 74.5 % | 1,335 | 2.45 / 7.50 / 15.66 | 283 | 38 |
+1. Raw readings: range limits (DO 0.1-20 mg/L, pH 4-11, temperature
+   15-40 °C); runs of 30 or more identical DO or pH readings removed.
+2. Hourly medians of at least 3 valid readings, then stuck-sensor rules at the
+   hourly level, because a stuck sensor whose runs are broken by gaps passes
+   the raw check: any run of 6 or more consecutive valid hours with an
+   identical DO (or pH) value is removed, and any exact DO value that recurs
+   in more than 2 % of a pond's valid hours is removed (for pH, which the
+   probe quantises coarsely, only a recurring floor or ceiling value).
 
-Caveats, which apply to every result in section 4.8:
+| Pond | DO hours before hourly rules | Removed: identical run | Removed: recurring value | Removed (either) | DO hours after | DO p5 / median / p95 (mg/L) | Hours < 4 mg/L | Hours < 2 mg/L | pH hours removed | Used |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 1 | 1,176 | 0 | 0 | 0 | 1,176 | 0.83 / 4.21 / 12.11 | 554 | 301 | 277 | yes |
+| 3 | 1,426 | 572 | 747 | 747 | 679 | 2.54 / 6.62 / 16.23 | 141 | 15 | 207 | no |
+| 4 | 1,230 | 0 | 0 | 0 | 1,230 | 1.12 / 4.57 / 10.34 | 520 | 219 | 189 | yes |
+| 6 | 1,367 | 0 | 0 | 0 | 1,367 | 0.48 / 5.25 / 15.62 | 559 | 371 | 23 | yes |
+| 7 | 1,944 | 0 | 0 | 0 | 1,944 | 2.64 / 7.18 / 18.20 | 347 | 61 | 219 | yes |
+| 9 | 1,335 | 25 | 125 | 125 | 1,210 | 2.41 / 7.06 / 15.88 | 283 | 38 | 125 | yes |
+
+Five ponds are used: 1, 4, 6, 7 and 9. Caveats, which apply to every result in
+section 4.8:
 
 - **Freshwater catfish, not vannamei.** It shows how the DO methods behave in
   a stocked pond; it says nothing about prawn thresholds or brackish water.
 - **No salinity sensor** (salinity is written as 0.0), so there are no status
   labels and no status classification on this dataset: DO tasks only.
-- **The DO sensor is noisy.** The 95th percentile of hourly DO is 10-18 mg/L,
-  implausibly high for a stocked indoor pond, and only about half to
-  two-thirds of each pond's calendar hours have valid DO.
-- **Five of the 11 files are excluded**, with the evidence printed by the
-  script: pond 2 repeats 97.7 % of pond 1's (timestamp, DO) pairs, so it is
-  not an independent pond; pond 8 has 644 hours of valid DO; ponds 10, 11 and
-  12 have 6, 13 and 1.
-- **The ponds are not stationary.** Conditions in a pond's late (test) period
-  can differ sharply from its early (training) period; in pond 6 mean DO is
-  7.41 mg/L over the training samples and 2.77 over the test samples.
+- **The DO sensor is noisy and sometimes stuck.** In pond 3 the value 5.080
+  mg/L fills 747 of 1,426 DO hours (52.4 %); in pond 9 the values 8.634 and
+  9.227 mg/L fill 125 hours. Even after cleaning, the 95th percentile of
+  hourly DO is 10-18 mg/L, implausibly high for a stocked indoor pond, and
+  only about half to two-thirds of each pond's calendar hours have valid DO.
+- **Six of the 11 files are excluded**, with the evidence printed by the
+  script and decided from the data alone, never from model scores: pond 2
+  repeats 97.7 % of pond 1's (timestamp, DO) pairs, so it is not an
+  independent pond; pond 3 has 679 hours of valid DO left after the stuck
+  hours are removed and pond 8 has 644, both under the 1,000-hour minimum;
+  ponds 10, 11 and 12 have 6, 13 and 1.
+- **Removing stuck pH hours costs usable samples.** 23 to 277 pH hours per
+  used pond are removed as identical runs; a window that touches the resulting
+  gap is skipped, so the usable +1 h samples are 362 to 845 per pond and the
+  test sets are small (43 to 127 hours).
+- **The ponds drift strongly.** Monthly mean DO in pond 1 falls from 7.81 mg/L
+  in June to 1.20 in September; pond 4 from 7.80 to 1.37; pond 6 from 10.14 to
+  1.68 in October. A model trained on a pond's early months is tested on very
+  different water. The full monthly table is in `data/ponds/monthly_do.csv`.
+- **Test-period check.** Before any model is trained, `09_real_ponds.py`
+  leaves out a pond whose test period is more than half flagged or flat. After
+  cleaning no pond fails it: 0 % flagged and 1-5 % flat in all five.
 
 ## 4. Results
 
@@ -296,40 +317,40 @@ of test readings.
 
 ### 4.8 Real catfish ponds, freshwater (09)
 
-Six ponds, 24-h input window, 32 LSTM units, 3 seeds. "Local" is trained on the
-pond's own early data; "transferred" is trained on the other five ponds and
-never sees the test pond. Means over the six ponds:
+Five ponds, 24-h input window, 32 LSTM units, 3 seeds. "Local" is trained on
+the pond's own early data; "transferred" is trained on the other four ponds
+and never sees the test pond. Means over the five ponds:
 
-| Task | Local LSTM | LSTM from other 5 ponds | Persistence | Same hour yesterday | Local beats better baseline | Transferred beats better baseline | Transferred beats local |
+| Task | Local LSTM | LSTM from the other ponds | Persistence | Same hour yesterday | Local beats better baseline | Transferred beats better baseline | Transferred beats local |
 |---|---|---|---|---|---|---|---|
-| DO forecast RMSE (mg/L), +1 h | 0.870 | 0.852 | 0.660 | 1.278 | 0 of 6 | 0 of 6 | 4 of 6 |
-| DO forecast RMSE (mg/L), +3 h | 1.176 | 1.355 | 0.861 | 1.154 | 0 of 6 | 0 of 6 | 2 of 6 |
-| DO forecast RMSE (mg/L), +6 h | 1.440 | 1.768 | 0.982 | 1.229 | 0 of 6 | 0 of 6 | 2 of 6 |
-| Oxygen state macro F1, +6 h | 0.294 | 0.372 | 0.673 | 0.644 | 0 of 6 | 0 of 6 | 4 of 6 |
+| DO forecast RMSE (mg/L), +1 h | 0.835 | 0.835 | 0.712 | 1.585 | 0 of 5 | 0 of 5 | 2 of 5 |
+| DO forecast RMSE (mg/L), +3 h | 1.152 | 1.293 | 0.885 | 1.376 | 0 of 5 | 0 of 5 | 2 of 5 |
+| DO forecast RMSE (mg/L), +6 h | 1.442 | 1.591 | 0.990 | 1.323 | 0 of 5 | 0 of 5 | 2 of 5 |
+| Oxygen state macro F1, +6 h | 0.230 | 0.254 | 0.572 | 0.542 | 1 of 5 | 0 of 5 | 3 of 5 |
 
 Per pond at +6 h (LSTMs: mean ± sd over seeds):
 
 | Pond | Test hours | RMSE: local | RMSE: transferred | RMSE: persistence | RMSE: yesterday | F1: local | F1: transferred | F1: persistence | F1: yesterday |
 |---|---|---|---|---|---|---|---|---|---|
-| 1 | 115 | 0.996 ± 0.034 | 2.045 ± 0.321 | 0.894 | 0.875 | 0.323 ± 0.037 | 0.156 ± 0.055 | 0.497 | 0.482 |
-| 3 | 158 | 0.495 ± 0.124 | 1.280 ± 0.235 | 0.021 | 0.033 | 0.960 ± 0.057 | 0.684 ± 0.096 | 1.000 | 1.000 |
-| 4 | 114 | 1.627 ± 0.179 | 2.439 ± 0.446 | 1.386 | 1.349 | 0.173 ± 0.069 | 0.482 ± 0.057 | 0.522 | 0.538 |
-| 6 | 98 | 2.247 ± 0.944 | 2.003 ± 0.167 | 1.300 | 1.385 | 0.103 ± 0.000 | 0.271 ± 0.027 | 0.633 | 0.642 |
-| 7 | 168 | 1.863 ± 0.341 | 1.246 ± 0.119 | 1.043 | 1.871 | 0.176 ± 0.133 | 0.295 ± 0.050 | 0.891 | 0.722 |
-| 9 | 98 | 1.411 ± 0.159 | 1.593 ± 0.054 | 1.249 | 1.861 | 0.030 ± 0.028 | 0.343 ± 0.051 | 0.495 | 0.481 |
+| 1 | 43 | 1.219 ± 0.284 | 1.713 ± 0.145 | 0.788 | 0.927 | 0.443 ± 0.069 | 0.159 ± 0.068 | 0.427 | 0.427 |
+| 4 | 69 | 1.022 ± 0.138 | 2.341 ± 0.711 | 0.820 | 1.088 | 0.220 ± 0.157 | 0.164 ± 0.118 | 0.473 | 0.565 |
+| 6 | 89 | 2.224 ± 0.688 | 1.322 ± 0.051 | 1.152 | 0.935 | 0.067 ± 0.000 | 0.087 ± 0.082 | 0.618 | 0.634 |
+| 7 | 110 | 1.581 ± 0.198 | 1.294 ± 0.083 | 1.128 | 1.967 | 0.297 ± 0.028 | 0.363 ± 0.020 | 0.843 | 0.589 |
+| 9 | 65 | 1.163 ± 0.080 | 1.287 ± 0.355 | 1.060 | 1.696 | 0.122 ± 0.076 | 0.496 ± 0.000 | 0.496 | 0.496 |
 
 The +1 h and +3 h rows per pond are in `reports/results_summary.md`.
 
-**A clear negative result.** No LSTM, local or transferred, beats the better
-of the two baselines in any of the six ponds, at any horizon, on either task.
-Persistence is the best method at +1 h in every pond. The models fail because
-the ponds change between the training and test periods and a model trained on
-the early period cannot follow; persistence adapts because it only looks at
-the last reading. Pond 3's test period is almost flat (persistence RMSE 0.021
-mg/L) and contains only Normoxia, so its scores say little. Test sets are
-small (98 to 181 hours per pond). Nothing was tuned after seeing these
-results. This agrees with the finding attributed to the leakage-aware
-re-analysis of the same dataset, that simple baselines matched deep models.
+**Still a negative result after the data fix.** No LSTM, local or transferred,
+beats the better of the two baselines for DO forecasting in any of the five
+ponds at any horizon; persistence is the best method at +1 h in every pond.
+For the oxygen state, the local LSTM is ahead in one pond of five (pond 1:
+0.443 ± 0.069 against 0.427), a margin smaller than its spread over seeds on a
+43-hour test set, and the transferred model in none. The most likely reason
+is the drift shown in section 3: a model trained on a pond's early months
+cannot follow water that has changed, while persistence only looks at the last
+reading. Test sets are small (43 to 110 hours at +6 h), one architecture was
+used, and nothing was tuned after seeing these results, so this does not show
+that no model could do better on these ponds.
 
 **The doses in `recommend.py` are unverified.** They are typical figures
 recalled from Indian extension guidance (CIBA / MPEDA) and have not been
@@ -341,7 +362,7 @@ and water test.
 
 | | Synthetic pond | Real (estuarine monitoring data) | Real catfish ponds, freshwater |
 |---|---|---|---|
-| Shows | That the pipeline recovers known pond dynamics; how much error is pure sensor noise; behaviour under a pond-like daily DO cycle. | That the pipeline survives real sensor noise, drift, QC flags and gaps; honest forecast skill on measured DO; transfer between two sites. | How the DO methods behave in real stocked ponds with a cheap, noisy sensor: persistence beats every LSTM in all six ponds, so the short-horizon LSTM gains seen on the other two datasets do not carry over. |
+| Shows | That the pipeline recovers known pond dynamics; how much error is pure sensor noise; behaviour under a pond-like daily DO cycle. | That the pipeline survives real sensor noise, drift, QC flags and gaps; honest forecast skill on measured DO; transfer between two sites. | How the DO methods behave in real stocked ponds with a cheap, noisy sensor: persistence beats every LSTM forecast in all five usable ponds, so the short-horizon LSTM gains seen on the other two datasets do not carry over. It also shows how much sensor cleaning real pond data needs. |
 | Does not show | Anything about a real pond: the dynamics and class balance were designed. Good results here are a check of the method, not field evidence. | Anything about a prawn pond: no aeration, feeding or stocking, and tides dominate. Status accuracy is 1.0 by construction. | Anything about vannamei or brackish water: freshwater catfish, no salinity, no status labels. Small test sets and one architecture, so it does not show that no model could do better. |
 
 No dataset here validates the system for a working vannamei farm. That needs
@@ -420,11 +441,12 @@ LSTM, the quantum-LSTM, de França et al.).
 - Udanor et al. (2022). *Data in Brief*, 43, 108400. Dataset: "Sensor Based
   Aquaponics Fish Pond Datasets", Kaggle, doi:10.34740/KAGGLE/DSV/3748790
   (CC BY 4.0).
-- Leakage-aware re-analysis of the Udanor et al. dataset:
-  github.com/MohamedElminur1/DL_Models_Fishweight. Its published SHA-256 sums
-  were used to verify the raw files. Its finding that simple baselines matched
-  deep models on this dataset is cited as described in the project brief; the
-  re-analysis itself was not read while this code was written.
+- Leakage-aware re-analysis of the Udanor et al. dataset for FISH WEIGHT
+  prediction (under review at the MDPI Aquaculture Journal):
+  github.com/MohamedElminur1/DL_Models_Fishweight. It found simple baselines
+  competitive for fish weight on the same dataset. It is not about dissolved
+  oxygen and is not evidence for the DO results here; this project used only
+  its published SHA-256 sums, to verify the raw files.
 - NOAA National Estuarine Research Reserve System (NERRS). System-wide
   Monitoring Program. Data accessed from the NOAA NERRS Centralized Data
   Management Office website: http://www.nerrsdata.org
