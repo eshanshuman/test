@@ -160,27 +160,42 @@ def summarize_ponds() -> None:
     if qc_path.exists():
         qc = pd.read_csv(qc_path).fillna("")
         out("### Raw files and quality control (prepare_ponds)\n")
-        table(["Pond", "Raw rows", "DO kept", "Hours with DO", "DO p5 / median / p95 (mg/L)",
-               "Hours < 4 mg/L", "Hours < 2 mg/L", "Used", "Why excluded"],
-              [[r.pond, f"{r.raw_rows:,}", f"{r.do_kept_pct:.1f} %", f"{r.hours_with_do:,}",
+        table(["Pond", "Raw rows", "Raw DO kept", "DO hours before hourly rules", "Removed: identical run",
+               "Removed: recurring value", "Removed (either)", "DO hours after", "DO p5 / median / p95 (mg/L)",
+               "Hours < 4 mg/L", "Hours < 2 mg/L", "pH hours removed", "Used", "Why excluded"],
+              [[r.pond, f"{r.raw_rows:,}", f"{r.do_kept_pct:.1f} %", f"{r.do_hours_before_hourly_qc:,}",
+                r.do_removed_stuck_run, r.do_removed_recurring, r.do_removed_hourly_total, f"{r.hours_with_do:,}",
                 f"{r.do_p5:.2f} / {r.do_median:.2f} / {r.do_p95:.2f}", r.hours_below_4, r.hours_below_2,
-                "yes" if r.used else "no", r.exclusion_reason] for r in qc.itertuples()])
+                r.ph_removed_hourly_total, "yes" if r.used else "no", r.exclusion_reason] for r in qc.itertuples()])
+    monthly_path = ROOT / "data" / "ponds" / "monthly_do.csv"
+    if monthly_path.exists():
+        out("### Drift check: monthly DO after cleaning, mg/L (prepare_ponds)\n")
+        table(["Pond", "Month", "Hours", "Mean", "SD", "Min", "Max"],
+              [[r.pond, r.month, r.hours, f"{r.mean:.2f}", f"{r.sd:.2f}", f"{r.min:.2f}", f"{r.max:.2f}"]
+               for r in pd.read_csv(monthly_path).itertuples()])
     if not m_path.exists():
         return
     b = json.loads(m_path.read_text(encoding="utf-8"))["09_real_ponds"]
+    if "test_period_check" in b:
+        out("### Test-period check per pond (09), from the data alone\n")
+        table(["Pond", "Test period starts", "Valid DO hours", "Flagged hours", "Flagged share", "Flat share",
+               "DO SD (mg/L)", "Excluded from 09"],
+              [[p, c["test_starts"], c["valid_do_hours"], c["flagged_hours"], f"{100 * c['flagged_share']:.0f} %",
+                f"{100 * c['flat_share']:.0f} %", f"{c['do_sd']:.2f}", c["excluded"] or "no"]
+               for p, c in b["test_period_check"].items()])
     out(f"### DO forecast per pond (09), test RMSE in mg/L, {b['window_h']}-h window, {b['seeds']} seeds\n")
-    table(["Pond", "Horizon", "Test hours", "Local LSTM", "LSTM from other 5 ponds", "Persistence",
+    table(["Pond", "Horizon", "Test hours", "Local LSTM", "LSTM from the other ponds", "Persistence",
            "Same hour yesterday"],
           [[r["pond"], f"+{r['horizon']} h", r["n_test"], pm(r["local_rmse"], r["local_rmse_sd"]),
             pm(r["transfer_rmse"], r["transfer_rmse_sd"]), f(r["persistence_rmse"]), f(r["yesterday_rmse"])]
            for r in b["forecast"]])
     out(f"### Oxygen state +6 h per pond (09), macro F1 over the states present\n")
-    table(["Pond", "Test hours", "States in test", "Local LSTM", "LSTM from other 5 ponds", "Persistence",
+    table(["Pond", "Test hours", "States in test", "Local LSTM", "LSTM from the other ponds", "Persistence",
            "Same hour yesterday"],
           [[r["pond"], r["n_test"], r["states_in_test"], pm(r["local_f1"], r["local_f1_sd"]),
             pm(r["transfer_f1"], r["transfer_f1_sd"]), f(r["persistence_f1"]), f(r["yesterday_f1"])]
            for r in b["state"]])
-    out("### Mean over the six ponds (09)\n")
+    out(f"### Mean over the {len(b['ponds'])} ponds (09)\n")
     rows = []
     for name, v in b["summary"].items():
         key = "rmse" if name.startswith("forecast") else "f1"
@@ -189,7 +204,7 @@ def summarize_ponds() -> None:
                      f"{v['local_beats_better_baseline']} of {v['ponds']}",
                      f"{v['transfer_beats_better_baseline']} of {v['ponds']}",
                      f"{v['transfer_beats_local']} of {v['ponds']}"])
-    table(["Task", "Local LSTM", "LSTM from other 5 ponds", "Persistence", "Same hour yesterday",
+    table(["Task", "Local LSTM", "LSTM from the other ponds", "Persistence", "Same hour yesterday",
            "Local beats better baseline", "Transferred beats better baseline", "Transferred beats local"], rows)
 
 

@@ -1,14 +1,15 @@
 """09 - DO forecasting and oxygen-state warning on real stocked ponds.
 
 Purpose
-    The only test in this project on real STOCKED ponds: six African-catfish
-    ponds from Udanor et al. 2022 (prepared by tools/prepare_ponds.py). Every
+    The only test in this project on real STOCKED ponds: the usable
+    African-catfish ponds from Udanor et al. 2022 (prepared and cleaned by
+    tools/prepare_ponds.py; config.POND_IDS). Every
     result is "real catfish ponds, freshwater": not vannamei, no salinity, a
     noisy DO sensor. Three experiments, 3 seeds each, 32 LSTM units:
       A. Per pond: LSTM DO forecast at +1, +3, +6 h vs persistence and
          same-hour-yesterday on the same test hours.
       B. Leave-one-pond-out: one LSTM trained on the training sets of the
-         other five ponds (scaler from their training hours, early stopping on
+         other ponds (scaler from their training hours, early stopping on
          their validation sets), tested on the held-out pond's test hours,
          the same hours as A.
       C. Oxygen state 6 h ahead (Anoxia / Hypoxia / Normoxia), local and
@@ -27,11 +28,19 @@ Purpose
         scaler is fitted on hours of the training period only.
     Nothing here was tuned to beat the baselines.
 
+    Test-period check, made BEFORE any model is trained and from the data
+    alone: a pond is left out of this script if, in its test period, more than
+    half of the DO hours were flagged by the hourly stuck-sensor rules, or
+    more than half of the valid DO hours lie within a 0.05 mg/L band around
+    the period's median (a flat line cannot test a forecast). Model scores
+    play no part in deciding which ponds are used.
+
 Paper link
-    Data: Udanor et al. 2022 (Data in Brief 43:108400). A leakage-aware
-    re-analysis of the same dataset (github.com/MohamedElminur1/
-    DL_Models_Fishweight) reports that simple baselines matched deep models;
-    this script asks the same question for DO.
+    Data: Udanor et al. 2022 (Data in Brief 43:108400). The raw files were
+    verified against the SHA-256 sums published with a re-analysis of the same
+    dataset for fish-weight prediction (github.com/MohamedElminur1/
+    DL_Models_Fishweight); that work is not about DO and is not used as
+    evidence here.
 
 Outputs
     figures/ponds/fig18_pond_forecast.png; reports/ponds/09_forecast.csv,
@@ -53,8 +62,9 @@ cfg.apply_style()
 FIG_DIR, REPORT_DIR = cfg.ROOT / "figures" / "ponds", cfg.ROOT / "reports" / "ponds"
 WINDOW, UNITS, SEEDS, EPOCHS, PATIENCE = 24, 32, (0, 1, 2), 40, 6
 HORIZONS, STATE_HORIZON = (1, 3, 6), 6
+TEST_SHARE_LIMIT, FLAT_BAND = 0.5, 0.05      # test-period check (see docstring)
 METHODS = {"local": ("Local LSTM", cfg.SERIES_COLOURS[0], "o"),
-           "transfer": ("LSTM from the other 5 ponds", cfg.SERIES_COLOURS[1], "s"),
+           "transfer": ("LSTM from the other ponds", cfg.SERIES_COLOURS[1], "s"),
            "persistence": ("Persistence", cfg.SERIES_COLOURS[2], "^"),
            "yesterday": ("Same hour yesterday", "#777777", "D")}
 
@@ -65,6 +75,22 @@ def split(series: dict, horizon: int) -> dict:
     t1, t2 = t[int(0.70 * len(t))], t[int(0.85 * len(t))]     # first hour of the val / test period
     return {"train": t[t + horizon < t1], "val": t[(t >= t1) & (t + horizon < t2)], "test": t[t >= t2],
             "train_rows": series["values"][:t1]}                # hours of the training period
+
+
+def test_period_check(series: dict, flagged: np.ndarray) -> dict:
+    """Data-only check of a pond's test period (+1 h split): share flagged, share flat."""
+    start = split(series, 1)["test"][0]
+    measured, fl = series["do_measured"][start:], flagged[start:]
+    valid = series["values"][start:, ts.DO][measured]
+    flagged_share = float(fl.sum() / max(fl.sum() + measured.sum(), 1))
+    flat_share = float((np.abs(valid - np.median(valid)) <= FLAT_BAND / 2).mean())
+    reason = (f"{100 * flagged_share:.0f} % of its test-period DO hours were flagged as stuck sensor"
+              if flagged_share > TEST_SHARE_LIMIT else
+              f"{100 * flat_share:.0f} % of its test-period DO lies within {FLAT_BAND} mg/L of the median (flat)"
+              if flat_share > TEST_SHARE_LIMIT else "")
+    return {"test_starts": str(series["time"][start])[:16], "valid_do_hours": int(measured.sum()),
+            "flagged_hours": int(fl.sum()), "flagged_share": round(flagged_share, 4),
+            "flat_share": round(flat_share, 4), "do_sd": round(float(valid.std()), 3), "excluded": reason}
 
 
 def scaler(rows: np.ndarray):
@@ -174,7 +200,7 @@ def fig_forecast(table: pd.DataFrame) -> None:
     ax.set_ylim(bottom=0)
     ax.grid(axis="x", visible=False)
     ax.legend(fontsize=8, loc="upper center", bbox_to_anchor=(0.5, -0.16), ncol=4)   # below the plot: clear of the dots
-    ax.set_title(f"DO forecast error on six ponds: small dots = one pond, large = mean over ponds\n"
+    ax.set_title(f"DO forecast error on {table['pond'].nunique()} ponds: small dots = one pond, large = mean over ponds\n"
                  f"{cfg.PONDS_NOTE} (Udanor et al. 2022); LSTMs averaged over {len(SEEDS)} seeds")
     cfg.save_fig(fig, "fig18_pond_forecast", FIG_DIR)
 
@@ -185,7 +211,23 @@ def main() -> None:
     if missing:
         raise SystemExit(f"data/ponds/ files missing for ponds {missing}: run tools/prepare_ponds.py first.")
     REPORT_DIR.mkdir(parents=True, exist_ok=True)
-    ponds = {p: ts.prepare_series(cfg.load_dataset(cfg.PONDS_DIR / f"pond_{p:02d}.csv")) for p in cfg.POND_IDS}
+    ponds, checks = {}, {}
+    for p in cfg.POND_IDS:
+        df = cfg.load_dataset(cfg.PONDS_DIR / f"pond_{p:02d}.csv")
+        ponds[p] = ts.prepare_series(df)
+        flags = df.set_index(cfg.TIME_COL)["do_flag"].reindex(ponds[p]["time"]).fillna("")
+        checks[p] = test_period_check(ponds[p], (flags != "").to_numpy())
+
+    cfg.section("Test-period check (data only, before any model is trained)")
+    print(f"  {'pond':>4} {'test starts':>17} {'valid DO h':>11} {'flagged h':>10} {'flagged':>8} {'flat':>6} {'DO sd':>6}")
+    for p, c in checks.items():
+        print(f"  {p:>4} {c['test_starts']:>17} {c['valid_do_hours']:>11} {c['flagged_hours']:>10} "
+              f"{100 * c['flagged_share']:>7.0f}% {100 * c['flat_share']:>5.0f}% {c['do_sd']:>6.2f}"
+              + (f"   EXCLUDED: {c['excluded']}" if c["excluded"] else ""))
+    ponds = {p: s for p, s in ponds.items() if not checks[p]["excluded"]}
+    print(f"  -> ponds used: {list(ponds)} (limit: more than {100 * TEST_SHARE_LIMIT:.0f} % flagged or flat)")
+
+    cfg.section("Samples per pond")
     print(f"  window {WINDOW} h, {UNITS} units, {len(SEEDS)} seeds, split over ordered usable samples")
     print(f"  {'pond':>4} {'grid h':>7} {'DO h':>6} {'usable +1 h samples':>20}  train / val / test    test period starts")
     for p, s in ponds.items():
@@ -202,7 +244,7 @@ def main() -> None:
     state = pd.DataFrame(run_task(ponds, STATE_HORIZON, "state"))
     state.round(4).to_csv(REPORT_DIR / "09_state.csv", index=False)
 
-    cfg.section("Summary over the six ponds")
+    cfg.section(f"Summary over the {len(ponds)} ponds")
     summary = {}
     print(f"  {'task':<14}{'local':>8}{'transfer':>10}{'persist.':>10}{'yesterday':>11}   "
           f"local > base   transfer > base   transfer > local")
@@ -224,7 +266,8 @@ def main() -> None:
     cfg.section("Figure")
     fig_forecast(forecast)
     cfg.record_metric("09_real_ponds", {
-        "note": cfg.PONDS_NOTE, "ponds": list(cfg.POND_IDS), "window_h": WINDOW, "units": UNITS,
+        "note": cfg.PONDS_NOTE, "ponds": list(ponds), "test_period_check": checks,
+        "window_h": WINDOW, "units": UNITS,
         "seeds": len(SEEDS), "summary": summary,
         "forecast": forecast.round(4).to_dict(orient="records"),
         "state": state.round(4).to_dict(orient="records")}, REPORT_DIR / "metrics.json")
